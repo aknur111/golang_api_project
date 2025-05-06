@@ -1,18 +1,17 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
-	"errors"
 
 	"goproject/internal/data"
 	"goproject/internal/validator"
 )
 
-
 func (app *application) createSongHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Id       int 	`json:"id"`
+		Id       int    `json:"id"`
 		Title    string `json:"title"`
 		Length   int    `json:"length"`
 		Album_id int    `json:"albumId"`
@@ -49,7 +48,6 @@ func (app *application) createSongHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-
 	// Call the Insert() method on our songs model, passing in a pointer to the
 	// validated song struct. This will create a record in the database and update the
 	// song struct with the system-generated information.
@@ -85,7 +83,7 @@ func (app *application) showSongHandler(w http.ResponseWriter, r *http.Request) 
 	// stored in the request context. We can use the ParamsFromContext() function to
 	// retrieve a slice containing these parameter names and values.
 	//params := httprouter.ParamsFromContext(r.Context())
-	
+
 	// We can then use the ByName() method to get the value of the "id" parameter from
 	// the slice. In our project all movies will have a unique positive integer ID, but
 	// the value returned by ByName() is always a string. So we try to convert it to a
@@ -97,7 +95,7 @@ func (app *application) showSongHandler(w http.ResponseWriter, r *http.Request) 
 		// Use the new notFoundResponse() helper.
 		app.notFoundResponse(w, r)
 		return
-	}	
+	}
 
 	// Call the Get() method to fetch the data for a specific movie. We also need to
 	// use the errors.Is() function to check if it returns a data.ErrRecordNotFound
@@ -106,15 +104,14 @@ func (app *application) showSongHandler(w http.ResponseWriter, r *http.Request) 
 	song, err := app.models.Songs.Get(id)
 	if err != nil {
 		switch {
-			case errors.Is(err, data.ErrRecordNotFound):
-				app.notFoundResponse(w, r)
-			default:
-				app.serverErrorResponse(w, r, err)
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
 		}
 		return
 	}
 
-	
 	// Encode the struct to JSON and send it as the HTTP response.
 	// err = app.writeJSON(w, http.StatusOK, envelope{"movie": movie}, nil)
 	err = app.writeJSON(w, http.StatusOK, envelope{"song": song}, nil)
@@ -135,11 +132,11 @@ func (app *application) updateSongHandler(w http.ResponseWriter, r *http.Request
 	// response to the client if we couldn't find a matching record.
 	// movie, err := app.models.Movies.Get(id)
 	song, err := app.models.Songs.Get(id)
-	
+
 	if err != nil {
 		switch {
-			case errors.Is(err, data.ErrRecordNotFound):
-				app.notFoundResponse(w, r)
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
 		default:
 			app.serverErrorResponse(w, r, err)
 		}
@@ -210,10 +207,10 @@ func (app *application) deleteSongHandler(w http.ResponseWriter, r *http.Request
 
 	if err != nil {
 		switch {
-			case errors.Is(err, data.ErrRecordNotFound):
-				app.notFoundResponse(w, r)
-			default:
-				app.serverErrorResponse(w, r, err)
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
 		}
 		return
 	}
@@ -229,25 +226,23 @@ func (app *application) listSongsHandler(w http.ResponseWriter, r *http.Request)
 	// Embed the new Filters struct.
 
 	var input struct {
-		Title    string `json:"title"`
-		Length   int    `json:"length"`
+		Title  string `json:"title"`
+		Length int    `json:"length"`
 		data.Filters
 	}
 
 	// Initialize a new Validator instance.
 	v := validator.New()
-	
+
 	// Call r.URL.Query() to get the url.Values map containing the query string data.
 	qs := r.URL.Query()
-	
+
 	// Use our helpers to extract the title and genres query string values, falling back
 	// to defaults of an empty string and an empty slice respectively if they are not
 	// provided by the client.
 	input.Title = app.readString(qs, "title", "")
 
-
 	input.Length = app.readInt(qs, "length", 1, v)
-	
 
 	// Get the page and page_size query string values as integers. Notice that we set
 	// the default page value to 1 and default page_size to 20, and that we pass the
@@ -286,4 +281,3 @@ func (app *application) listSongsHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 }
-	

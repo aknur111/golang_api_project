@@ -1,4 +1,4 @@
-CREATE DATABASE ourproject;
+-- CREATE DATABASE ourproject;
 
 -- Creating tables
 CREATE TABLE groups (
@@ -40,16 +40,17 @@ VALUES (1, 'BTS', 7),
        (3, 'EXO', 9);
 
 INSERT INTO singer(singer_id, first_name, last_name, birthday, group_id)
-VALUES (1, 'Nam-joon', 'Kim','12-09-1994',1),
-       (2,'Ji-min', 'Park','13-10-1995',1),
-       (3,'Yoon-gi', 'Min','09-03-1993',1),
-       (4,'Ji-soo', 'Kim','03-01-1995',2),
-       (5,'Jennie', 'Kim','16-01-1996',2),
-       (6,'Lisa', 'Manoban','27-03-1997',2),
-       (7,'Roseanne', 'Park','11-02-1997',2),
-       (8,'Baek-hyun', 'Byun','06-05-1992',3),
-       (9,'Chan-yeol', 'Park','27-11-1992',3),
-       (10,'Min-seok', 'Kim','26-03-1990',3);
+VALUES (1, 'Nam-joon', 'Kim','1994-09-12',1),
+       (2,'Ji-min', 'Park','1995-10-13',1),
+       (3,'Yoon-gi', 'Min','1993-03-09',1),
+       (4,'Ji-soo', 'Kim','1995-01-03',2),
+       (5,'Jennie', 'Kim','1996-01-16',2),
+       (6,'Lisa', 'Manoban','1997-03-27',2),
+       (7,'Roseanne', 'Park','1997-02-11',2),
+       (8,'Baek-hyun', 'Byun','1992-05-06',3),
+       (9,'Chan-yeol', 'Park','1992-11-27',3),
+       (10,'Min-seok', 'Kim','1990-03-26',3);
+
 
 INSERT INTO album(album_id, title, genre, num_of_tracks, group_id)
 VALUES (100,'Map of the Soul', 'EDM',16,1),

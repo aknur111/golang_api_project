@@ -79,16 +79,16 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst int
 		switch {
 		case errors.As(err, &syntaxError):
 			return fmt.Errorf("body contains badly-formed JSON (at character %d)", syntaxError.Offset)
-		
+
 		case errors.Is(err, io.ErrUnexpectedEOF):
 			return errors.New("body contains badly-formed JSON")
-		
+
 		case errors.As(err, &unmarshalTypeError):
 			if unmarshalTypeError.Field != "" {
 				return fmt.Errorf("body contains incorrect JSON type for field %q", unmarshalTypeError.Field)
 			}
 			return fmt.Errorf("body contains incorrect JSON type (at character %d)", unmarshalTypeError.Offset)
-		
+
 		case errors.Is(err, io.EOF):
 			return errors.New("body must not be empty")
 
@@ -101,16 +101,16 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst int
 		case strings.HasPrefix(err.Error(), "json: unknown field "):
 			fieldName := strings.TrimPrefix(err.Error(), "json: unknown field ")
 			return fmt.Errorf("body contains unknown key %s", fieldName)
-		
+
 		// If the request body exceeds 1MB in size the decode will now fail with the
 		// error "http: request body too large". There is an open issue about turning
 		// this into a distinct error type at https://github.com/golang/go/issues/30715.
 		case err.Error() == "http: request body too large":
 			return fmt.Errorf("body must not be larger than %d bytes", maxBytes)
-		
+
 		case errors.As(err, &invalidUnmarshalError):
 			panic(err)
-		
+
 		default:
 			return err
 		}
@@ -120,14 +120,13 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst int
 	// return an io.EOF error. So if we get anything else, we know that there is
 	// additional data in the request body and we return our own custom error message.
 	err = dec.Decode(&struct{}{})
-	
+
 	if err != io.EOF {
 		return errors.New("body must only contain a single JSON value")
 	}
-	
+
 	return nil
 }
-
 
 // The readString() helper returns a string value from the query string, or the provided
 // default value if no matching key could be found.
@@ -151,7 +150,7 @@ func (app *application) readString(qs url.Values, key string, defaultValue strin
 // func (app *application) readCSV(qs url.Values, key string, defaultValue []string) []string {
 // 	// Extract the value from the query string.
 // 	csv := qs.Get(key)
-	
+
 // 	// If no key exists (or the value is empty) then return the default value.
 // 	if csv == "" {
 // 		return defaultValue
@@ -168,7 +167,7 @@ func (app *application) readString(qs url.Values, key string, defaultValue strin
 func (app *application) readInt(qs url.Values, key string, defaultValue int, v *validator.Validator) int {
 	// Extract the value from the query string.
 	s := qs.Get(key)
-	
+
 	// If no key exists (or the value is empty) then return the default value.
 	if s == "" {
 		return defaultValue

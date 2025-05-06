@@ -1,29 +1,29 @@
 package data
 
 import (
-	"goproject/internal/validator"
 	"context"
 	"database/sql"
 	"errors"
-	"time"
 	"fmt"
+	"time"
 
+	"goproject/internal/validator"
 	//"github.com/lib/pq"
 )
 
+type Song struct {
+	Id       int    `json:"id"`
+	Title    string `json:"title"`
+	Length   int    `json:"length"`
+	Album_id int    `json:"albumId"`
+}
 
-type Song struct{
-	Id 			int		`json:"id"`
-	Title 		string	`json:"title"`
-	Length 		int		`json:"length"`
-	Album_id	int 	`json:"albumId"`
-} 
-
-func ValidateSong(v *validator.Validator, song *Song){
+func ValidateSong(v *validator.Validator, song *Song) {
 	v.Check(song.Title != "", "title", "must be provided")
 	v.Check(song.Id > 0, "id", "must be greater than 0")
 	v.Check(song.Album_id != 0, "albumId", "must be greater than 0")
 }
+
 /*
 func ValidateMovie(v *validator.Validator, movie *Movie) {
 	v.Check(movie.Title != "", "title", "must be provided")
@@ -77,7 +77,7 @@ func (s SongModel) Get(id int64) (*Song, error) {
 
 	// Retrieve a specific menu item based on its ID.
 	query := `
-		SELECT song_id, title, length, album_id
+		SELECT song_id, title, COALESCE(length, 0), album_id
 		FROM song
 		WHERE song_id = $1;`
 
@@ -114,7 +114,6 @@ func (s SongModel) Update(song *Song) error {
 	return s.DB.QueryRowContext(ctx, query, args...).Scan(&song.Id, &song.Title, &song.Length, &song.Album_id)
 }
 
-
 func (s SongModel) Delete(id int64) error {
 	// Return an ErrRecordNotFound error if the movie ID is less than 1.
 	if id < 1 {
@@ -139,7 +138,7 @@ func (s SongModel) Delete(id int64) error {
 	if err != nil {
 		return err
 	}
-	
+
 	// If no rows were affected, we know that the movies table didn't contain a record
 	// with the provided ID at the moment we tried to delete it. In that case we
 	// return an ErrRecordNotFound error.
@@ -149,28 +148,27 @@ func (s SongModel) Delete(id int64) error {
 	return nil
 }
 
-
 // Create a new GetAll() method which returns a slice of movies. Although we're not
 // using them right now, we've set this up to accept the various filter parameters as
 // arguments.
 func (s SongModel) GetAll(title string, length int, filters Filters) ([]*Song, Metadata, error) {
 	// Construct the SQL query to retrieve all movie records.
-	query :=  fmt.Sprintf(`
-		SELECT count(*) OVER(), song_id, title, length, album_id
+	query := fmt.Sprintf(`
+		SELECT count(*) OVER(), song_id, title, COALESCE(length, 0), album_id
 		FROM song
 		WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		AND (length = $2 OR $2 = 1)
 		ORDER BY %s %s, song_id
 		LIMIT $3 OFFSET $4`, filters.sortColumn(), filters.sortDirection())
-	
-/*SELECT count(*) OVER(), song_id, title, length, album_id
-		FROM song
-		WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
-		AND (length = $2 OR $2 = '{}')
-		ORDER BY %s %s, id ASC
-		LIMIT $3 OFFSET $4`
-		WHERE (title ILIKE $1 OR $1 = '')
-		*/
+
+	/*SELECT count(*) OVER(), song_id, title, length, album_id
+	FROM song
+	WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
+	AND (length = $2 OR $2 = '{}')
+	ORDER BY %s %s, id ASC
+	LIMIT $3 OFFSET $4`
+	WHERE (title ILIKE $1 OR $1 = '')
+	*/
 
 	// Create a context with a 3-second timeout.
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)

@@ -1,16 +1,16 @@
 package main
 
 import (
-	"context" 
-	"database/sql" 
+	"context"
+	"database/sql"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"time"
-	"goproject/internal/data"
 
+	"goproject/internal/data"
 
 	// Import the pq driver so that it can register itself with the database/sql
 	// package. Note that we alias this import to the blank identifier, to stop the Go
@@ -18,15 +18,14 @@ import (
 	_ "github.com/lib/pq"
 )
 
-
 const version = "1.0.0"
 
 // Add a db struct field to hold the configuration settings for our database connection
 // pool. For now this only holds the DSN, which we will read in from a command-line flag.
 type config struct {
 	port int
-	env string
-	db struct {
+	env  string
+	db   struct {
 		dsn string
 	}
 }
@@ -48,17 +47,16 @@ func main() {
 	// corresponding flags are provided.
 	flag.IntVar(&cfg.port, "port", 8080, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
-	
+
 	// Read the DSN value from the db-dsn command-line flag into the config struct. We
 	// default to using our development DSN if no flag is provided.
-	flag.StringVar(&cfg.db.dsn, "db-dsn", "user=postgres password='Ulp@sh05' dbname=goproject sslmode=disable", "PostgreSQL DSN")
+	flag.StringVar(&cfg.db.dsn, "db-dsn", "user=postgres password=110755 dbname=goproject sslmode=disable", "PostgreSQL DSN")
 
 	flag.Parse()
 
 	// Initialize a new logger which writes messages to the standard out stream,
 	// prefixed with the current date and time.
-	logger := log.New(os.Stdout, "", log.Ldate | log.Ltime)
-
+	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 
 	// Call the openDB() helper function (see below) to create the connection pool,
 	// passing in the config struct. If this returns an error, we log it and exit the
@@ -76,7 +74,7 @@ func main() {
 	// established.
 	logger.Printf("database connection pool established")
 
-	app := &application {
+	app := &application{
 		config: cfg,
 		logger: logger,
 		models: data.NewModels(db),
@@ -86,13 +84,13 @@ func main() {
 	// port provided in the config struct and uses the servemux we created above as the
 	// handler.
 	srv := &http.Server{
-		Addr: 			fmt.Sprintf(":%d", cfg.port),
-		Handler: 		app.routes(),
-		IdleTimeout:	time.Minute,
-		ReadTimeout: 	10 * time.Second,
-		WriteTimeout: 	30 * time.Second,
+		Addr:         fmt.Sprintf(":%d", cfg.port),
+		Handler:      app.routes(),
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 30 * time.Second,
 	}
-	
+
 	// Start the HTTP server.
 	logger.Printf("starting %s server on %s", cfg.env, srv.Addr)
 	// Because the err variable is now already declared in the code above, we need
@@ -125,4 +123,3 @@ func openDB(cfg config) (*sql.DB, error) {
 	// Return the sql.DB connection pool.
 	return db, nil
 }
-	
